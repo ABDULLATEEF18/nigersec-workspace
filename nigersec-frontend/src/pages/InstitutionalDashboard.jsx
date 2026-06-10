@@ -1,38 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// ── API CONFIG ────────────────────────────────────────────────────────────────
+//  API CONFIG 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
-// ── API: fetch live threat alerts ─────────────────────────────────────────────
+//  API: fetch live threat alerts 
 async function apiFetchAlerts(orgId) {
   const res = await fetch(`${API_URL}/v1/institutional/alerts?org_id=${encodeURIComponent(orgId || 'demo')}`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
-// ── API: fetch live KPI summary ───────────────────────────────────────────────
+//  API: fetch live KPI summary 
 async function apiFetchKPIs(orgId) {
   const res = await fetch(`${API_URL}/v1/institutional/kpis?org_id=${encodeURIComponent(orgId || 'demo')}`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
-// ── API: fetch live hotspots ──────────────────────────────────────────────────
+//  API: fetch live hotspots 
 async function apiFetchHotspots() {
   const res = await fetch(`${API_URL}/v1/institutional/hotspots`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
-// ── API: fetch BVN batch exposure ─────────────────────────────────────────────
+//  API: fetch BVN batch exposure 
 async function apiFetchBVNBatches(orgId) {
   const res = await fetch(`${API_URL}/v1/institutional/bvn-exposure?org_id=${encodeURIComponent(orgId || 'demo')}`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
-// ── API: submit anonymous peer report ────────────────────────────────────────
+//  API: submit anonymous peer report 
 async function apiSubmitReport(payload) {
   const res = await fetch(`${API_URL}/v1/institutional/report`, {
     method: 'POST',
@@ -43,7 +43,7 @@ async function apiSubmitReport(payload) {
   return res.json();
 }
 
-// ── API: Gemini AI threat explainer ──────────────────────────────────────────
+//  API: Gemini AI threat explainer 
 async function apiExplainThreat(alert) {
   if (!GEMINI_API_KEY) {
     return 'Add VITE_GEMINI_API_KEY to your .env file to enable AI threat analysis. Get it free at aistudio.google.com.';
@@ -65,7 +65,7 @@ async function apiExplainThreat(alert) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate analysis.';
 }
 
-// ── MOCK DATA (fallbacks when API is offline) ─────────────────────────────────
+//  MOCK DATA (fallbacks when API is offline) 
 const ALERTS = [
   { id: 1, severity: 'CRITICAL', type: 'Phishing Campaign', title: 'BVN Harvesting Portal Active', detail: 'secure-bankng.com mimicking CBN portal. 2,340 clicks recorded in last 6 hours.', region: 'Nationwide', time: '2 min ago', match: true },
   { id: 2, severity: 'CRITICAL', type: 'Credential Breach', title: 'API Key Rotation Needed', detail: 'OAuth token hijacking pattern detected. Same pattern caused ₦11B loss at peer institution.', region: 'Lagos', time: '8 min ago', match: true },
@@ -111,7 +111,7 @@ const COMPLIANCE_MONTHS = [
   { m: 'Aug', status: 'upcoming', score: null },
 ];
 
-// ── CSS (Shared Styles) ─────────────────────────────────────────────────────
+//  CSS (Shared Styles) 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
 
@@ -605,7 +605,7 @@ body, #root { margin: 0; padding: 0; width: 100%; }
 }
 `;
 
-// ── LOGIN PAGE COMPONENT ────────────────────────────────────────────────────
+//  LOGIN PAGE COMPONENT 
 function InstitutionalLogin({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -655,7 +655,7 @@ function InstitutionalLogin({ onLogin }) {
       <div style={{ position: 'relative', zIndex: 2, width: '100%', maxWidth: '460px', margin: '1.5rem', animation: 'fadeUp 0.5s ease-out' }}>
         <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ width: '64px', height: '64px', margin: '0 auto 1rem', background: 'linear-gradient(135deg, rgba(0,168,107,0.2), rgba(0,135,81,0.15))', border: '1px solid rgba(0,168,107,0.4)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>🛡</div>
+          <div style={{ width: '64px', height: '64px', margin: '0 auto 1rem', background: 'linear-gradient(135deg, rgba(0,168,107,0.2), rgba(0,135,81,0.15))', border: '1px solid rgba(0,168,107,0.4)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}></div>
           <h1 style={{ fontFamily: "var(--head), 'Syne', sans-serif", fontSize: '1.75rem', fontWeight: 800, color: '#FEF9C3', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>NigerSec</h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Institutional Threat Intelligence</p>
         </div>
@@ -696,7 +696,7 @@ function InstitutionalLogin({ onLogin }) {
   );
 }
 
-// ── HELPER FUNCTIONS ────────────────────────────────────────────────────────
+//  HELPER FUNCTIONS 
 function SevPill({ s }) {
   return <span className={`sev sev-${s}`}>{s}</span>;
 }
@@ -712,7 +712,7 @@ function KPI({ label, value, delta, up, color }) {
   );
 }
 
-// ── GEMINI THREAT EXPLAINER ──────────────────────────────────────────────────
+//  GEMINI THREAT EXPLAINER 
 function ExplainButton({ alert }) {
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -734,7 +734,7 @@ function ExplainButton({ alert }) {
   return (
     <div>
       <button className="btn-xs btn-xs-ghost" onClick={explain} style={{ color: '#4AE8A0', borderColor: 'rgba(74,232,160,0.3)' }}>
-        {loading ? '⏳ Analysing…' : open ? '▲ Hide AI analysis' : '✦ AI Explain'}
+        {loading ? ' Analysing…' : open ? ' Hide AI analysis' : ' AI Explain'}
       </button>
       {open && (
         <div style={{ marginTop: 8, padding: '10px 12px', background: 'rgba(74,232,160,0.05)', border: '1px solid rgba(74,232,160,0.2)', borderRadius: 8, fontSize: 12, color: '#C8E8C0', lineHeight: 1.7 }}>
@@ -745,7 +745,7 @@ function ExplainButton({ alert }) {
   );
 }
 
-// ── DASHBOARD PANELS ──────────────────────────────────────────────────────────
+//  DASHBOARD PANELS 
 function PanelAlerts({ orgId }) {
   const [alerts, setAlerts] = useState(null);
   const [source, setSource] = useState('loading');
@@ -764,7 +764,7 @@ function PanelAlerts({ orgId }) {
   return (
     <div>
       <div className="id-section-head">
-        <h2><span className="id-refresh-dot" />Live Alert Feed{source === 'live' && <span style={{ marginLeft: 8, fontSize: 10, color: '#4AE8A0', fontWeight: 700 }}> ● Live API</span>}{source === 'demo' && <span style={{ marginLeft: 8, fontSize: 10, color: '#EAB308', fontWeight: 700 }}> ○ Demo data</span>}</h2>
+        <h2><span className="id-refresh-dot" />Live Alert Feed{source === 'live' && <span style={{ marginLeft: 8, fontSize: 10, color: '#4AE8A0', fontWeight: 700 }}>  Live API</span>}{source === 'demo' && <span style={{ marginLeft: 8, fontSize: 10, color: '#EAB308', fontWeight: 700 }}>  Demo data</span>}</h2>
         <span>Auto-refreshes every 30s</span>
       </div>
       {source === 'loading' && <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>Fetching live threats…</div>}
@@ -780,7 +780,7 @@ function PanelAlerts({ orgId }) {
                 <div style={{ background: 'var(--border)', borderRadius: 3, height: 4, overflow: 'hidden' }}><div style={{ width: `${a.ml_score}%`, height: 4, borderRadius: 3, background: a.severity === 'CRITICAL' ? '#EF4444' : '#F97316', transition: 'width 0.8s ease' }} /></div>
               </div>
             )}
-            <div className="id-alert-meta"><span className="id-alert-region">📍 {a.region}</span>{a.match && <span style={{ fontSize: 11, color: '#FCA5A5', padding: '2px 6px', background: 'rgba(239,68,68,0.1)', borderRadius: 4 }}>⚠ Matches your profile</span>}<span className="id-alert-time">{a.time}</span></div>
+            <div className="id-alert-meta"><span className="id-alert-region"> {a.region}</span>{a.match && <span style={{ fontSize: 11, color: '#FCA5A5', padding: '2px 6px', background: 'rgba(239,68,68,0.1)', borderRadius: 4 }}> Matches your profile</span>}<span className="id-alert-time">{a.time}</span></div>
             <div className="id-alert-actions"><button className="btn-xs btn-xs-red">Block</button><button className="btn-xs btn-xs-ghost">Details</button>{a.match && <button className="btn-xs btn-xs-green">Apply protection</button>}</div>
             <div style={{ marginTop: 6 }}><ExplainButton alert={a} /></div>
           </div>
@@ -802,12 +802,12 @@ function PanelBVN({ orgId }) {
   const items = batches || [];
   return (
     <div>
-      <div className="id-section-head"><h2>BVN &amp; NIN Batch Tracker</h2><span>{items.length} active batches {source === 'live' && <span style={{ color: '#4AE8A0' }}>● Live</span>}</span></div>
-      <div style={{ padding: '8px 12px', background: 'rgba(74,232,160,0.07)', border: '1px solid rgba(74,232,160,0.15)', borderRadius: 8, marginBottom: 12, fontSize: 12, color: '#4AE8A0' }}>✓ Your institution's BVNs — 0 confirmed exposures in active batches</div>
+      <div className="id-section-head"><h2>BVN &amp; NIN Batch Tracker</h2><span>{items.length} active batches {source === 'live' && <span style={{ color: '#4AE8A0' }}> Live</span>}</span></div>
+      <div style={{ padding: '8px 12px', background: 'rgba(74,232,160,0.07)', border: '1px solid rgba(74,232,160,0.15)', borderRadius: 8, marginBottom: 12, fontSize: 12, color: '#4AE8A0' }}> Your institution's BVNs — 0 confirmed exposures in active batches</div>
       {items.map(b => (
         <div key={b.id} className="id-batch-card">
           <div className="id-batch-head"><div><div className="id-batch-id">{b.id}</div><div className="id-batch-count">{b.count} records</div><div style={{ fontSize: 12, color: '#FCA5A5', fontWeight: 600 }}>Est. {b.exposed} exposed</div></div><SevPill s={b.severity} /></div>
-          <div className="id-batch-meta"><span className="id-batch-source">Source: {b.source}</span><span className="id-batch-source">Detected: {b.detected}</span>{b.yourExposure && <span className="id-exposure-warn">⚠ Your customers may be affected</span>}</div>
+          <div className="id-batch-meta"><span className="id-batch-source">Source: {b.source}</span><span className="id-batch-source">Detected: {b.detected}</span>{b.yourExposure && <span className="id-exposure-warn"> Your customers may be affected</span>}</div>
           <div className="id-alert-actions" style={{ marginTop: 8 }}><button className="btn-xs btn-xs-ghost">View full batch</button><button className="btn-xs btn-xs-red">Flag for review</button></div>
         </div>
       ))}
@@ -827,11 +827,11 @@ function PanelPhishing() {
   const items = campaigns || [];
   return (
     <div>
-      <div className="id-section-head"><h2>Phishing Campaigns</h2><span>{items.length} active campaigns {source === 'live' && <span style={{ color: '#4AE8A0' }}>● Live</span>}</span></div>
+      <div className="id-section-head"><h2>Phishing Campaigns</h2><span>{items.length} active campaigns {source === 'live' && <span style={{ color: '#4AE8A0' }}> Live</span>}</span></div>
       {items.map(p => (
         <div key={p.id} className="id-phish-item">
           <div className="id-phish-head"><div><div className="id-phish-title">Campaign #{p.id}</div><div className="id-phish-active">Active {p.active} · {p.target}</div></div><SevPill s={p.severity} /></div>
-          <div className="id-phish-domains">{p.domains.map(d => <span key={d} className="id-domain-tag">⚠ {d}</span>)}</div>
+          <div className="id-phish-domains">{p.domains.map(d => <span key={d} className="id-domain-tag"> {d}</span>)}</div>
           <div style={{ marginBottom: 8 }}>{p.emails.map(e => <div key={e} className="id-phish-email">"{e}"</div>)}</div>
           <div className="id-alert-actions"><button className="btn-xs btn-xs-red">Block all domains</button><button className="btn-xs btn-xs-ghost">Export signatures</button><button className="btn-xs btn-xs-ghost">Report to NDPC</button></div>
         </div>
@@ -853,10 +853,10 @@ function PanelPeer({ orgId }) {
   const items = reports || [];
   return (
     <div>
-      <div className="id-section-head"><h2>Peer Intelligence</h2><span>Identity stripped before sharing {source === 'live' && <span style={{ color: '#4AE8A0' }}>● Live</span>}</span></div>
+      <div className="id-section-head"><h2>Peer Intelligence</h2><span>Identity stripped before sharing {source === 'live' && <span style={{ color: '#4AE8A0' }}> Live</span>}</span></div>
       <div className="id-grid-2">
         <div>
-          <div className="id-anon-badge">🔒 Anonymised — institution identity removed before sharing</div>
+          <div className="id-anon-badge">Anonymised — institution identity removed before sharing</div>
           {items.map(r => (
             <div key={r.id} className="id-peer-item">
               <div className="id-peer-head"><span className="id-peer-id">REPORT-{r.id} · {r.sector}</span><span className="id-peer-time">{r.time}</span></div>
@@ -872,7 +872,7 @@ function PanelPeer({ orgId }) {
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Submit a breach report</div>
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem', color: '#4AE8A0' }}>
-              <div style={{ fontSize: '2rem', marginBottom: 8 }}>✓</div><div style={{ fontWeight: 600, marginBottom: 4 }}>Report submitted anonymously</div>
+              <div style={{ fontSize: '2rem', marginBottom: 8 }}></div><div style={{ fontWeight: 600, marginBottom: 4 }}>Report submitted anonymously</div>
               <div style={{ fontSize: 12, color: 'var(--muted)' }}>Your institution identity has been removed. The intelligence will be shared with the network within 10 minutes.</div>
               <button className="btn-xs btn-xs-ghost" style={{ marginTop: 12 }} onClick={() => setSubmitted(false)}>Submit another</button>
             </div>
@@ -903,7 +903,7 @@ function PanelCompliance() {
   const items = months || COMPLIANCE_MONTHS;
   return (
     <div>
-      <div className="id-section-head"><h2>NDPA 2023 Compliance</h2><span>Auto-generated from submitted data {source === 'live' && <span style={{ color: '#4AE8A0' }}>● Live</span>}</span></div>
+      <div className="id-section-head"><h2>NDPA 2023 Compliance</h2><span>Auto-generated from submitted data {source === 'live' && <span style={{ color: '#4AE8A0' }}> Live</span>}</span></div>
       <div className="id-grid-2">
         <div className="id-card">
           <div style={{ textAlign: 'center', marginBottom: '1rem' }}><svg width="100" height="100" viewBox="0 0 100 100" style={{ display: 'block', margin: '0 auto 8px' }}><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" /><circle cx="50" cy="50" r="40" fill="none" stroke="#00A86B" strokeWidth="8" strokeDasharray={`${87 * 2.51} ${100 * 2.51}`} strokeLinecap="round" transform="rotate(-90 50 50)" /><text x="50" y="46" textAnchor="middle" fill="#E7EEFC" fontSize="18" fontWeight="800" fontFamily="Syne,sans-serif">87%</text><text x="50" y="60" textAnchor="middle" fill="#6B7FA3" fontSize="9" fontFamily="DM Sans,sans-serif">COMPLIANCE</text></svg></div>
@@ -914,12 +914,12 @@ function PanelCompliance() {
             ['NDPA registration', true, 'NDPC/REG/2024/0847'],
             ['Privacy policy published', true, 'Updated Feb 2026'],
             ['Data mapping complete', false, 'In progress — due Jul 2026'],
-          ].map(([item, ok, note]) => (<div key={item} className="id-compliance-row"><span>{item}</span><div style={{ textAlign: 'right' }}><span className={ok ? 'id-check' : 'id-warn-icon'}>{ok ? '✓' : '⚠'}</span><div style={{ fontSize: 10, color: 'var(--muted)' }}>{note}</div></div></div>))}</div>
+          ].map(([item, ok, note]) => (<div key={item} className="id-compliance-row"><span>{item}</span><div style={{ textAlign: 'right' }}><span className={ok ? 'id-check' : 'id-warn-icon'}>{ok ? '' : ''}</span><div style={{ fontSize: 10, color: 'var(--muted)' }}>{note}</div></div></div>))}</div>
           <div className="id-export-row"><button className="id-export-btn id-export-btn-green">Export PDF</button><button className="id-export-btn id-export-btn-ghost">Export Excel</button><button className="id-export-btn id-export-btn-ghost">Submit to NDPC</button></div>
         </div>
         <div className="id-card">
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Reporting history</div>
-          <div className="id-table-scroll"><table className="id-table"><thead><tr><th>Month</th><th>Status</th><th>Score</th><th>Submitted</th></tr></thead><tbody>{items.filter(m => m.status !== 'upcoming').map(m => (<tr key={m.m}><td>{m.m} 2026</td><td><span className={`sev sev-${m.status === 'submitted' ? 'LOW' : 'MEDIUM'}`}>{m.status.toUpperCase()}</span></td><td>{m.score ? `${m.score}%` : '—'}</td><td>{m.status === 'submitted' ? '✓ On time' : 'Draft ready'}</td></tr>))}</tbody></table></div>
+          <div className="id-table-scroll"><table className="id-table"><thead><tr><th>Month</th><th>Status</th><th>Score</th><th>Submitted</th></tr></thead><tbody>{items.filter(m => m.status !== 'upcoming').map(m => (<tr key={m.m}><td>{m.m} 2026</td><td><span className={`sev sev-${m.status === 'submitted' ? 'LOW' : 'MEDIUM'}`}>{m.status.toUpperCase()}</span></td><td>{m.score ? `${m.score}%` : '—'}</td><td>{m.status === 'submitted' ? ' On time' : 'Draft ready'}</td></tr>))}</tbody></table></div>
         </div>
       </div>
     </div>
@@ -949,12 +949,12 @@ function PanelDashboard({ orgId }) {
         <KPI label="Compliance score" value={`${k.complianceScore}%`} delta="Report auto-generated" up={true} color="#00A86B" />
       </div>
       <div className="id-grid-60-40">
-        <div className="id-card"><div className="id-section-head"><h2><span className="id-refresh-dot" />Critical alerts</h2><span>5s refresh</span></div>{ALERTS.slice(0,3).map(a => (<div key={a.id} className={`id-alert-item${a.match ? ' match' : ''}`}><SevPill s={a.severity} /><div className="id-alert-body"><div className="id-alert-title">{a.title}</div><div className="id-alert-detail">{a.detail}</div><div className="id-alert-meta"><span className="id-alert-region">📍 {a.region}</span><span className="id-alert-time">{a.time}</span></div></div></div>))}</div>
-        <div className="id-card"><div className="id-section-head"><h2>Fraud hotspots</h2><span>Nigeria {mapSource === 'live' && <span style={{ color: '#4AE8A0' }}>● Live</span>}</span></div><div className="id-map"><div className="id-map-grid" /><div className="id-map-label">NIGERIA · FRAUD DENSITY MAP</div>{mapPoints.map(h => (<div key={h.city} className="id-hotspot" style={{ left: `${h.x}%`, top: `${h.y}%` }}><div className="id-hotspot-ring" style={{ background: SEV_COLOR[h.severity] + '33' }} /><div className="id-hotspot-dot" style={{ background: SEV_COLOR[h.severity] }}><div className="id-hotspot-label" style={{ color: SEV_COLOR[h.severity] }}>{h.city} ({h.count})</div></div></div>))}<div className="id-map-legend">{Object.entries(SEV_COLOR).map(([sev, col]) => (<div key={sev} className="id-legend-item"><div className="id-legend-dot" style={{ background: col }} />{sev}</div>))}</div></div></div>
+        <div className="id-card"><div className="id-section-head"><h2><span className="id-refresh-dot" />Critical alerts</h2><span>5s refresh</span></div>{ALERTS.slice(0,3).map(a => (<div key={a.id} className={`id-alert-item${a.match ? ' match' : ''}`}><SevPill s={a.severity} /><div className="id-alert-body"><div className="id-alert-title">{a.title}</div><div className="id-alert-detail">{a.detail}</div><div className="id-alert-meta"><span className="id-alert-region"> {a.region}</span><span className="id-alert-time">{a.time}</span></div></div></div>))}</div>
+        <div className="id-card"><div className="id-section-head"><h2>Fraud hotspots</h2><span>Nigeria {mapSource === 'live' && <span style={{ color: '#4AE8A0' }}> Live</span>}</span></div><div className="id-map"><div className="id-map-grid" /><div className="id-map-label">NIGERIA · FRAUD DENSITY MAP</div>{mapPoints.map(h => (<div key={h.city} className="id-hotspot" style={{ left: `${h.x}%`, top: `${h.y}%` }}><div className="id-hotspot-ring" style={{ background: SEV_COLOR[h.severity] + '33' }} /><div className="id-hotspot-dot" style={{ background: SEV_COLOR[h.severity] }}><div className="id-hotspot-label" style={{ color: SEV_COLOR[h.severity] }}>{h.city} ({h.count})</div></div></div>))}<div className="id-map-legend">{Object.entries(SEV_COLOR).map(([sev, col]) => (<div key={sev} className="id-legend-item"><div className="id-legend-dot" style={{ background: col }} />{sev}</div>))}</div></div></div>
       </div>
         <div className="id-grid-2">
-        <div className="id-card"><div className="id-section-head"><h2>Active attack patterns</h2><span>Matched to your profile</span></div><div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}><table className="id-table" style={{ minWidth: '480px' }}><thead><tr><th>Pattern</th><th>Location</th><th>Severity</th><th>Match</th></tr></thead><tbody><tr><td>API credential theft</td><td>Lagos</td><td><SevPill s="HIGH" /></td><td style={{ color: '#FCA5A5' }}>✓ Matches</td></tr><tr><td>Login brute force</td><td>Nationwide</td><td><SevPill s="CRITICAL" /></td><td style={{ color: '#FCA5A5' }}>✓ Matches</td></tr><tr><td>Fake KYC portal</td><td>Abuja</td><td><SevPill s="MEDIUM" /></td><td style={{ color: 'var(--muted)' }}>Monitoring</td></tr></tbody></table></div></div>
-        <div className="id-card"><div className="id-section-head"><h2>Peer reports</h2><span>Anonymised pool</span></div><div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}><table className="id-table" style={{ minWidth: '420px' }}><thead><tr><th>Sector</th><th>Issue</th><th>Action</th></tr></thead><tbody>{PEER_REPORTS.map(r => (<tr key={r.id}><td>{r.sector}</td><td>{r.issue}</td><td style={{ fontSize: 11, color: '#4AE8A0', fontFamily: 'var(--mono)' }}>{r.action.split('.')[0]}</td></tr>))}</tbody></table></div></div>
+        <div className="id-card"><div className="id-section-head"><h2>Active attack patterns</h2><span>Matched to your profile</span></div><div className="id-table-scroll"><table className="id-table"><thead><tr><th>Pattern</th><th>Location</th><th>Severity</th><th>Match</th></tr></thead><tbody><tr><td>API credential theft</td><td>Lagos</td><td><SevPill s="HIGH" /></td><td style={{ color: '#FCA5A5' }}> Matches</td></tr><tr><td>Login brute force</td><td>Nationwide</td><td><SevPill s="CRITICAL" /></td><td style={{ color: '#FCA5A5' }}> Matches</td></tr><tr><td>Fake KYC portal</td><td>Abuja</td><td><SevPill s="MEDIUM" /></td><td style={{ color: 'var(--muted)' }}>Monitoring</td></tr></tbody></table></div></div>
+        <div className="id-card"><div className="id-section-head"><h2>Peer reports</h2><span>Anonymised pool</span></div><div className="id-table-scroll"><table className="id-table"><thead><tr><th>Sector</th><th>Issue</th><th>Action</th></tr></thead><tbody>{PEER_REPORTS.map(r => (<tr key={r.id}><td>{r.sector}</td><td>{r.issue}</td><td style={{ fontSize: 11, color: '#4AE8A0', fontFamily: 'var(--mono)' }}>{r.action.split('.')[0]}</td></tr>))}</tbody></table></div></div>
       </div>
     </div>
   );
@@ -962,7 +962,7 @@ function PanelDashboard({ orgId }) {
 
 const SEV_COLOR = { CRITICAL: '#EF4444', HIGH: '#F97316', MEDIUM: '#EAB308', LOW: '#4AE8A0' };
 
-// ── MAIN DASHBOARD COMPONENT ─────────────────────────────────────────────────
+//  MAIN DASHBOARD COMPONENT 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'alerts',    label: 'Live Alerts', badge: 3 },
@@ -992,13 +992,13 @@ function InstitutionDashboard({ user, onLogout }) {
       <style>{CSS}</style>
       <div className="id-wrap">
         <nav className="id-nav">
-          <a href="#" className="id-nav-brand" onClick={(e) => e.preventDefault()}><div className="id-nav-icon">🛡</div>NigerSec · Institution Portal</a>
-          <div className="id-nav-right"><span className="id-nav-org">{user?.name || 'Flutterwave'} · Compliance Officer</span><button className="id-nav-alert-btn" aria-label="Alerts">🔔 <span className="id-nav-alert-dot" /></button><button className="id-nav-logout" onClick={onLogout}>← Logout</button></div>
+          <a href="#" className="id-nav-brand" onClick={(e) => e.preventDefault()}><div className="id-nav-icon"></div>NigerSec · Institution Portal</a>
+          <div className="id-nav-right"><span className="id-nav-org">{user?.name || 'Flutterwave'} · Compliance Officer</span><button className="id-nav-alert-btn" aria-label="Alerts"> <span className="id-nav-alert-dot" /></button><button className="id-nav-logout" onClick={onLogout}>← Logout</button></div>
         </nav>
         <div className="id-layout">
           <aside className="id-sidebar">
             <div className="id-sidebar-section"><div className="id-sidebar-label">Intelligence</div>{NAV_ITEMS.map(item => (<div key={item.id} className={`id-sidebar-item${activePanel === item.id ? ' active' : ''}`} onClick={() => setActivePanel(item.id)}><span className="icon">{item.icon}</span>{item.label}{item.badge && <span className="id-sidebar-badge">{item.badge}</span>}</div>))}</div>
-            <div className="id-sidebar-section"><div className="id-sidebar-label">Account</div><div className="id-sidebar-item"><span className="icon">⚙</span> Settings</div><div className="id-sidebar-item" onClick={onLogout}><span className="icon">→</span> Sign out</div></div>
+            <div className="id-sidebar-section"><div className="id-sidebar-label">Account</div><div className="id-sidebar-item"><span className="icon"></span> Settings</div><div className="id-sidebar-item" onClick={onLogout}><span className="icon">→</span> Sign out</div></div>
           </aside>
           <main className="id-main">{renderPanel()}</main>
         </div>
@@ -1006,11 +1006,11 @@ function InstitutionDashboard({ user, onLogout }) {
         {/* Mobile bottom navigation */}
         <nav className="id-bottom-nav">
           {[
-            { id: 'dashboard',  icon: '📊', label: 'Dashboard' },
-            { id: 'alerts',     icon: '🚨', label: 'Alerts' },
-            { id: 'bvn',        icon: '🏦', label: 'BVN/NIN' },
-            { id: 'phishing',   icon: '🎣', label: 'Phishing' },
-            { id: 'compliance', icon: '✅', label: 'NDPA' },
+            { id: 'dashboard', label: 'Dashboard' },
+            { id: 'alerts',    label: 'Alerts' },
+            { id: 'bvn',     label: 'BVN/NIN' },
+            { id: 'phishing',  label: 'Phishing' },
+            { id: 'compliance',  label: 'NDPA' },
           ].map(item => (
             <div
               key={item.id}
@@ -1027,7 +1027,7 @@ function InstitutionDashboard({ user, onLogout }) {
   );
 }
 
-// ── MAIN APP COMPONENT (Routes between Login and Dashboard) ─────────────────
+//  MAIN APP COMPONENT (Routes between Login and Dashboard) 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);

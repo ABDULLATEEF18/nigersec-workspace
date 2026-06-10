@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 
-// ── API CONFIG ────────────────────────────────────────────────────────────────
+//  API CONFIG 
 // Set VITE_API_URL in your .env file. Falls back to local dev server.
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-// ── REAL API CALL: breach check ───────────────────────────────────────────────
+//  REAL API CALL: breach check 
 async function checkBreach(type, rawValue) {
   const normalized = type === 'email'
     ? rawValue.trim().toLowerCase()
@@ -24,7 +24,7 @@ async function checkBreach(type, rawValue) {
   return { breached: data.breached, breaches: data.breaches || [], hash };
 }
 
-// ── REAL API CALL: notify me signup ──────────────────────────────────────────
+//  REAL API CALL: notify me signup 
 async function subscribeNotify(email) {
   const res = await fetch(`${API_URL}/v1/notify`, {
     method: 'POST',
@@ -35,7 +35,7 @@ async function subscribeNotify(email) {
   return res.json();
 }
 
-// ── REAL API CALL: platform stats ────────────────────────────────────────────
+//  REAL API CALL: platform stats 
 async function fetchStats() {
   const res = await fetch(`${API_URL}/v1/stats`);
   if (!res.ok) throw new Error(`API ${res.status}`);
@@ -43,7 +43,7 @@ async function fetchStats() {
 }
 
 // ---------- BREACH DATASETS ----------
-// ── EXPANDED BREACH POOLS ────────────────────────────────────────────
+//  EXPANDED BREACH POOLS 
 const BREACH_POOLS = {
   email: [
     { name: "Flutterwave", records: "4.2M", date: "Apr 2024", data: ["Email", "Phone", "BVN fragments"] },
@@ -81,7 +81,7 @@ const BREACH_POOLS = {
   ]
 };
 
-// ── RECENT BREACHES TABLE ────────────────────────────────────────────
+//  RECENT BREACHES TABLE 
 const RECENT_BREACHES = [
   { name: "Dark Web Telco Dump",          count: "60M+",   added: "Jan 2025", date: "Jan 2025",  sector: "Telecom" },
   { name: "NIMC / AnyVerify Exposure",    count: "89M+",   added: "Mar 2024", date: "Mar 2024",  sector: "Government" },
@@ -111,7 +111,7 @@ async function sha1Hex(str) {
 }
  
 async function simulateCheck(type, rawValue) {
-  // ── Try real ML backend first ────────────────────────────────────────────
+  //  Try real ML backend first 
   try {
     const apiResult = await checkBreach(type, rawValue);
     // Tag results so the UI knows these are real ML results
@@ -123,7 +123,7 @@ async function simulateCheck(type, rawValue) {
     console.warn('ML backend unavailable, falling back to local demo data:', error);
   }
 
-  // ── Local demo fallback (keeps working without backend) ──────────────────
+  //  Local demo fallback (keeps working without backend) 
   await new Promise(r => setTimeout(r, 900 + Math.random() * 400));
   const normalized = type === 'email' ? rawValue.trim().toLowerCase() : rawValue.replace(/\s/g, '');
   const hash = await sha1Hex(normalized);
@@ -140,13 +140,13 @@ async function simulateCheck(type, rawValue) {
 }
  
 const typeMap = {
-  email: { label: '✉ Email', placeholder: "your@email.com", hint: "e.g. johndoe@gmail.com", validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
-  phone: { label: '☎ Phone', placeholder: "08012345678", hint: "11 digits starting with 0", validate: v => /^0[7-9][01]\d{8}$/.test(v.replace(/\s/g, '')) },
-  nin:   { label: '🪪 NIN',  placeholder: "12345678901", hint: "11-digit NIN", validate: v => /^\d{11}$/.test(v) },
-  bvn:   { label: '🏦 BVN',  placeholder: "22334455667", hint: "11-digit BVN", validate: v => /^\d{11}$/.test(v) }
+  email: { label: ' Email', placeholder: "your@email.com", hint: "e.g. johndoe@gmail.com", validate: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+  phone: { label: ' Phone', placeholder: "08012345678", hint: "11 digits starting with 0", validate: v => /^0[7-9][01]\d{8}$/.test(v.replace(/\s/g, '')) },
+  nin:   { label: ' NIN',  placeholder: "12345678901", hint: "11-digit NIN", validate: v => /^\d{11}$/.test(v) },
+  bvn:   { label: ' BVN',  placeholder: "22334455667", hint: "11-digit BVN", validate: v => /^\d{11}$/.test(v) }
 };
  
-// ── Shared CSS injected once ─────────────────────────────────────────────────
+//  Shared CSS injected once 
 const CSS = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
  
@@ -392,7 +392,7 @@ const CSS = `
   .ns-api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; }
   @media (max-width: 700px) { .ns-api-grid { grid-template-columns: 1fr; } }
 
-  /* ── MOBILE RESPONSIVE ── */
+  /*  MOBILE RESPONSIVE  */
   /* Hamburger button — hidden on desktop */
   .ns-hamburger {
     display: none;
@@ -406,39 +406,45 @@ const CSS = `
     line-height: 1;
   }
 
+  /* Desktop nav links and buttons — visible on desktop */
+  .ns-nav-links-desktop { display: flex; gap: 2rem; }
+  .ns-nav-btns-desktop  { display: flex; gap: 0.6rem; align-items: center; }
+
+  /* Mobile dropdown */
+  .ns-mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(7,18,10,0.99);
+    border-bottom: 1px solid #1F3A24;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+  }
+  .ns-mobile-menu-link {
+    padding: 0.85rem 1.5rem;
+    color: #8FBB85;
+    font-size: 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #1a2e1e;
+    transition: color 0.15s;
+  }
+  .ns-mobile-menu-link:hover { color: #EAB308; }
+
   @media (max-width: 768px) {
     /* Nav */
-    .ns-nav-inner { padding: 0 1rem; position: relative; flex-wrap: wrap; height: auto; min-height: 56px; }
-    .ns-hamburger { display: block; }
-    .ns-nav-links {
-      display: none;
+    .ns-nav-inner {
+      padding: 0 1rem;
+      height: auto;
+      min-height: 56px;
       flex-direction: column;
-      gap: 0;
-      position: absolute;
-      top: 56px;
-      left: 0;
-      right: 0;
-      background: rgba(7,18,10,0.98);
-      border-bottom: 1px solid #1F3A24;
-      padding: 0.5rem 0;
-      z-index: 999;
+      align-items: stretch;
+      position: relative;
     }
-    .ns-nav-links.ns-mobile-open { display: flex; }
-    .ns-nav-link {
-      padding: 0.75rem 1.5rem;
-      border-bottom: none;
-      border-radius: 0;
-      font-size: 1rem;
-    }
-    .ns-nav-links .ns-nav-btn { display: none; }
-    /* Move portal buttons below hamburger row on mobile */
-    .ns-nav-portal-btns {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0.5rem 0 0.5rem 0;
-    }
-    .ns-nav-btn { font-size: 0.8rem; padding: 0.35rem 0.8rem; }
-
+    .ns-hamburger { display: block; }
+    .ns-nav-links-desktop { display: none; }
+    .ns-nav-btns-desktop { display: none !important; }
     /* Hero */
     .ns-hero { padding: 3rem 1rem 2rem; }
     .ns-h1 { font-size: clamp(1.6rem, 7vw, 2.5rem); }
@@ -448,7 +454,7 @@ const CSS = `
     .ns-tabs { gap: 0.4rem; }
     .ns-tab { padding: 0.45rem 0.9rem; font-size: 0.82rem; }
 
-    /* Input row — stack on very small screens */
+    /* Input row — stack on mobile */
     .ns-input-row { flex-direction: column; gap: 0.6rem; padding: 0 0.5rem; }
     .ns-input { min-width: unset; width: 100%; }
     .ns-check-btn { width: 100%; }
@@ -493,6 +499,7 @@ const CSS = `
 
     /* Footer */
     .ns-footer { flex-direction: column; gap: 1.5rem; padding: 1.5rem 1rem; }
+    
   }
 
   @media (max-width: 420px) {
@@ -601,7 +608,7 @@ export default function Home() {
   const lastScrollY = useRef(0);
   const navigate = useNavigate();
 
-  // ── Live platform stats ───────────────────────────────────────────────────
+  //  Live platform stats 
   const [liveStats, setLiveStats] = useState(null);
   useEffect(() => {
     fetchStats()
@@ -609,7 +616,7 @@ export default function Home() {
       .catch(() => {}); // silently fall back to hardcoded values if API is down
   }, []);
 
-  // ── Fraud score demo state ────────────────────────────────────────────────
+  //  Fraud score demo state 
   const [demoParams, setDemoParams] = useState({
     amount: 250000, account_age_days: 3, hour_of_day: 2,
     velocity_flag: true, bvn_in_breach: true,
@@ -674,10 +681,10 @@ export default function Home() {
     if (!notifyEmail.includes('@')) { alert('Valid email required'); return; }
     try {
       await subscribeNotify(notifyEmail);
-      setNotifyMsg('✓ You\'re on the list! We\'ll alert you when your data appears.');
+      setNotifyMsg(' You\'re on the list! We\'ll alert you when your data appears.');
     } catch {
       // API not yet deployed — still acknowledge in demo
-      setNotifyMsg('✓ Verification link sent! (demo mode — deploy backend to go live)');
+      setNotifyMsg(' Verification link sent! (demo mode — deploy backend to go live)');
     }
     setTimeout(() => setNotifyMsg(''), 4000);
     setNotifyEmail('');
@@ -695,10 +702,10 @@ export default function Home() {
 
     if (!result.breached) return (
       <div className="ns-result-ok">
-        <div style={{ fontSize: '2.2rem' }}>✅</div>
+        <div style={{ fontSize: '2.2rem' }}></div>
         <h3>No breaches found
           <span className={`ns-source-badge ${isLive ? 'ns-source-live' : 'ns-source-demo'}`}>
-            {isLive ? '● ML checked' : '○ Demo data'}
+            {isLive ? ' ML checked' : ' Demo data'}
           </span>
         </h3>
         <p>Your {currentType.toUpperCase()} was not found in any known breach. Stay safe.</p>
@@ -706,10 +713,10 @@ export default function Home() {
       </div>
     );
 
-    const actionPlan = currentType === 'bvn' ? '📞 Call your bank & request BVN fraud flag'
-      : currentType === 'nin' ? '🏛 Report to NIMC immediately'
-      : currentType === 'phone' ? '📱 Enable SIM swap protection'
-      : '🔐 Change passwords & enable 2FA';
+    const actionPlan = currentType === 'bvn' ? ' Call your bank & request BVN fraud flag'
+      : currentType === 'nin' ? ' Report to NIMC immediately'
+      : currentType === 'phone' ? ' Enable SIM swap protection'
+      : ' Change passwords & enable 2FA';
 
     // Severity colour map
     const sevColor = { critical: '#EF4444', high: '#F97316', medium: '#EAB308', low: '#10B981' };
@@ -717,12 +724,12 @@ export default function Home() {
     return (
       <div className="ns-result-found">
         <div className="ns-found-header">
-          <span style={{ fontSize: '2rem' }}>⚠️</span>
+          <span style={{ fontSize: '2rem' }}></span>
           <div>
             <div className="ns-found-title">
               Found in {result.breaches.length} breach{result.breaches.length > 1 ? 'es' : ''}!
               <span className={`ns-source-badge ${isLive ? 'ns-source-live' : 'ns-source-demo'}`}>
-                {isLive ? '● ML result' : '○ Demo data'}
+                {isLive ? ' ML result' : ' Demo data'}
               </span>
             </div>
             <div style={{ fontSize: '0.85rem', color: '#8FBB85' }}>Take action immediately</div>
@@ -761,8 +768,8 @@ export default function Home() {
           );
         })}
         <div className="ns-action-box">
-          <strong>⚡ Recommended action:</strong> {actionPlan}<br />
-          ✔ Enable 2FA · Monitor accounts · Report to NDPC
+          <strong> Recommended action:</strong> {actionPlan}<br />
+           Enable 2FA · Monitor accounts · Report to NDPC
         </div>
         <div className="ns-zk-proof">Zero-knowledge proof: {result.hash}</div>
       </div>
@@ -774,64 +781,73 @@ export default function Home() {
       <style>{CSS}</style>
       <div className="ns-wrap">
  
-        {/* ── NAV with hide/show class ── */}
+        {/*  NAV with hide/show class  */}
         <nav className={`ns-nav ${navHidden ? 'ns-nav-hidden' : ''}`}>
           <div className="ns-nav-inner">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-              {/* Left: logo + hamburger */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div className="ns-logo" onClick={() => { scrollTo('check'); setMobileMenuOpen(false); }}>
-                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-                    <polygon points="13,2 24,7.5 24,18.5 13,24 2,18.5 2,7.5"
-                      fill="none" stroke="#EAB308" strokeWidth="1.8" />
-                    <circle cx="13" cy="13" r="3" fill="#FACC15" />
-                  </svg>
-                  NigerSec
-                </div>
-                <button
-                  className="ns-hamburger"
-                  onClick={() => setMobileMenuOpen(o => !o)}
-                  aria-label="Toggle menu"
-                >
-                  {mobileMenuOpen ? '✕' : '☰'}
-                </button>
+            {/* Single row: logo left, hamburger right on mobile; full links + buttons on desktop */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+
+              {/* Logo */}
+              <div className="ns-logo" onClick={() => { scrollTo('check'); setMobileMenuOpen(false); }}>
+                <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+                  <polygon points="13,2 24,7.5 24,18.5 13,24 2,18.5 2,7.5"
+                    fill="none" stroke="#EAB308" strokeWidth="1.8" />
+                  <circle cx="13" cy="13" r="3" fill="#FACC15" />
+                </svg>
+                NigerSec
               </div>
 
-              {/* Desktop nav links (hidden on mobile via CSS) */}
-              <div className={`ns-nav-links${mobileMenuOpen ? ' ns-mobile-open' : ''}`}>
+              {/* Desktop: nav links in the middle */}
+              <div className="ns-nav-links-desktop">
                 {['check','breaches','howitworks','notify','api','about'].map(s => (
                   <span key={s}
                     className={`ns-nav-link${activeNav === s ? ' active' : ''}`}
-                    onClick={() => { scrollTo(s); setMobileMenuOpen(false); }}>
+                    onClick={() => scrollTo(s)}>
                     {{ check:'Check', breaches:'Breaches', howitworks:'How It Works',
                        notify:'Notify Me', api:'API', about:'About' }[s]}
                   </span>
                 ))}
               </div>
 
-              {/* Right: portal buttons */}
-              <div className="ns-nav-portal-btns" style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-                <button className="ns-nav-btn"
-                  onClick={() => navigate('/citizen')}>
-                  Dashboard
-                </button>
-                <button
-                  className="ns-nav-btn"
-                  style={{
-                    background: 'rgba(0,168,107,0.12)',
-                    borderColor: '#00A86B',
-                    color: '#4AE8A0',
-                  }}
-                  onClick={() => navigate('/institution')}
-                >
-                  Institution →
-                </button>
+              {/* Desktop: portal buttons on the right */}
+              <div className="ns-nav-btns-desktop" style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <button className="ns-nav-btn" onClick={() => navigate('/citizen')}>Dashboard</button>
+                <button className="ns-nav-btn" style={{ background: 'rgba(0,168,107,0.12)', borderColor: '#00A86B', color: '#4AE8A0' }}
+                  onClick={() => navigate('/institution')}>Institution →</button>
               </div>
+
+              {/* Mobile: hamburger button only */}
+              <button
+                className="ns-hamburger"
+                onClick={() => setMobileMenuOpen(o => !o)}
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? '' : ''}
+              </button>
             </div>
+
+            {/* Mobile dropdown menu */}
+            {mobileMenuOpen && (
+              <div className="ns-mobile-menu">
+                {['check','breaches','howitworks','notify','api','about'].map(s => (
+                  <span key={s}
+                    className="ns-mobile-menu-link"
+                    onClick={() => { scrollTo(s); setMobileMenuOpen(false); }}>
+                    {{ check:'Check', breaches:'Breaches', howitworks:'How It Works',
+                       notify:'Notify Me', api:'API', about:'About' }[s]}
+                  </span>
+                ))}
+                <div style={{ display: 'flex', gap: '0.6rem', padding: '0.75rem 1.5rem 1rem', borderTop: '1px solid #1F3A24' }}>
+                  <button className="ns-nav-btn" style={{ flex: 1 }} onClick={() => { navigate('/citizen'); setMobileMenuOpen(false); }}>Dashboard</button>
+                  <button className="ns-nav-btn" style={{ flex: 1, background: 'rgba(0,168,107,0.12)', borderColor: '#00A86B', color: '#4AE8A0' }}
+                    onClick={() => { navigate('/institution'); setMobileMenuOpen(false); }}>Institution →</button>
+                </div>
+              </div>
+            )}
           </div>
         </nav>
  
-        {/* ── HERO ────────────────────────────────────────────────── */}
+        {/*  HERO  */}
         <section id="check-section" className="ns-hero">
           <div className="ns-live-badge">
             <span className="ns-live-dot" />
@@ -866,10 +882,10 @@ export default function Home() {
           <div className="ns-zk-badge"> Zero‑knowledge: hashed client‑side, plaintext never transmitted</div>
         </section>
  
-        {/* ── RESULT ──────────────────────────────────────────────── */}
+        {/*  RESULT  */}
         {result && <div className="ns-result-wrap">{renderResult()}</div>}
  
-        {/* ── STATS BAND ──────────────────────────────────────────── */}
+        {/*  STATS BAND  */}
         <div className="ns-stats-band">
           {[
             { key: 'losses',    fallback: '₦122.78B', label: 'reported losses 2021–2025',   liveKey: null },
@@ -884,9 +900,9 @@ export default function Home() {
           ))}
         </div>
  
-        {/* ── BREACH TABLE ────────────────────────────────────────── */}
+        {/*  BREACH TABLE  */}
         <section id="breaches-section" className="ns-section">
-          <h2 className="ns-section-title">🇳🇬 Nigerian Breach Database</h2>
+          <h2 className="ns-section-title"> Nigerian Breach Database</h2>
           <p className="ns-section-sub">Known breaches affecting Nigerian citizens and institutions</p>
           <div className="ns-table-scroll">
           <div className="ns-table">
@@ -906,16 +922,16 @@ export default function Home() {
           </div>
         </section>
  
-        {/* ── HOW IT WORKS ────────────────────────────────────────── */}
+        {/*  HOW IT WORKS  */}
         <section id="howitworks-section" className="ns-section" style={{ textAlign: 'center' }}>
           <p style={{ color: '#EAB308', letterSpacing: '0.1em', fontSize: '0.8rem', marginBottom: '0.5rem' }}>ZERO‑KNOWLEDGE ARCHITECTURE</p>
           <h2 className="ns-section-title">How NigerSec protects you</h2>
           <div className="ns-hiw-grid" style={{ textAlign: 'left' }}>
             {[
-              { icon: '⌨️', title: 'Enter identifier', text: 'Email, phone, NIN or BVN – validated for Nigerian formats.' },
-              { icon: '⬡', title: 'Hashed on device', text: 'SHA‑1 via Web Crypto API – your data never leaves your browser as plaintext.' },
-              { icon: '🔍', title: 'Silent cross‑reference', text: 'Only the hash prefix is transmitted. Full match confirmed locally.' },
-              { icon: '⚡', title: 'Action plan', text: 'Tailored remediation steps for each exposed identifier type.' },
+              { icon: '⌨', title: 'Enter identifier', text: 'Email, phone, NIN or BVN – validated for Nigerian formats.' },
+              { icon: '', title: 'Hashed on device', text: 'SHA‑1 via Web Crypto API – your data never leaves your browser as plaintext.' },
+              { icon: '', title: 'Silent cross‑reference', text: 'Only the hash prefix is transmitted. Full match confirmed locally.' },
+              { icon: '', title: 'Action plan', text: 'Tailored remediation steps for each exposed identifier type.' },
             ].map((item, idx) => (
               <div key={idx} className="ns-hiw-card">
                 <div className="ns-hiw-icon">{item.icon}</div>
@@ -926,7 +942,7 @@ export default function Home() {
           </div>
         </section>
  
-        {/* ── NOTIFY ME ───────────────────────────────────────────── */}
+        {/*  NOTIFY ME  */}
         <section id="notify-section" className="ns-section">
           <div className="ns-notify">
             <h2 className="ns-section-title">Get breach notifications</h2>
@@ -947,7 +963,7 @@ export default function Home() {
           </div>
         </section>
  
-        {/* ── API ─────────────────────────────────────────────────── */}
+        {/*  API  */}
         <section id="api-section" className="ns-section">
           <div className="ns-api-grid">
             <div>
@@ -967,7 +983,7 @@ export default function Home() {
             {/* Live fraud demo */}
             <div className="ns-score-demo">
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#EAB308', letterSpacing: '0.07em', marginBottom: '0.8rem' }}>
-                ⚡ LIVE ML FRAUD SCORER
+                 LIVE ML FRAUD SCORER
               </div>
               <div className="ns-score-demo-grid">
                 <div className="ns-demo-field">
@@ -1023,12 +1039,12 @@ export default function Home() {
 
               <button className="ns-check-btn" style={{ width: '100%' }}
                 onClick={runFraudScore} disabled={scoring}>
-                {scoring ? <><span className="ns-spinner" /> Scoring…</> : '⚡ Run ML Score'}
+                {scoring ? <><span className="ns-spinner" /> Scoring…</> : ' Run ML Score'}
               </button>
 
               {scoreError && (
                 <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, fontSize: 12, color: '#FCA5A5' }}>
-                  ⚠️ {scoreError}
+                   {scoreError}
                 </div>
               )}
 
@@ -1046,7 +1062,7 @@ export default function Home() {
                       <div>
                         <div style={{ fontSize: '0.72rem', color: '#5A7A55', marginBottom: 3 }}>Risk · {scoreResult.risk_level}</div>
                         <div className="ns-score-rec" style={{ color: recCol[scoreResult.recommendation] || '#fff' }}>
-                          {scoreResult.recommendation === 'BLOCK' ? '🚫' : scoreResult.recommendation === 'REVIEW' ? '⚠️' : '✅'} {scoreResult.recommendation}
+                          {scoreResult.recommendation === 'BLOCK' ? '' : scoreResult.recommendation === 'REVIEW' ? '' : ''} {scoreResult.recommendation}
                         </div>
                         <div style={{ fontSize: '0.65rem', color: '#3B7040', marginTop: 3, fontFamily: 'monospace' }}>
                           {scoreResult.model_version} · p={scoreResult.ml_probability?.toFixed(3)}
@@ -1056,7 +1072,7 @@ export default function Home() {
                     {scoreResult.flags?.length > 0 && (
                       <div>
                         <div style={{ fontSize: '0.65rem', color: '#5A7A55', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Active flags</div>
-                        <div>{scoreResult.flags.map((f, i) => <span key={i} className="ns-flag-tag">⚑ {f}</span>)}</div>
+                        <div>{scoreResult.flags.map((f, i) => <span key={i} className="ns-flag-tag"> {f}</span>)}</div>
                       </div>
                     )}
                   </div>
@@ -1066,7 +1082,7 @@ export default function Home() {
           </div>
         </section>
  
-        {/* ── ABOUT ───────────────────────────────────────────────── */}
+        {/*  ABOUT  */}
         <section id="about-section" className="ns-about">
           <h2 className="ns-about-h2">We are building infrastructure,<br />not just a product.</h2>
           <p className="ns-about-p">
@@ -1080,7 +1096,7 @@ export default function Home() {
           </div>
         </section>
  
-        {/* ── FOOTER ──────────────────────────────────────────────── */}
+        {/*  FOOTER  */}
         <footer className="ns-footer">
           <div>
             <div className="ns-footer-brand">NigerSec</div>

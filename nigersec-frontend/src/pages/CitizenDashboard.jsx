@@ -1,30 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// ── API CONFIG ────────────────────────────────────────────────────────────────
+//  API CONFIG 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
-// ── SHA-256 (zero-knowledge hashing, runs in browser) ─────────────────────────
+//  SHA-256 (zero-knowledge hashing, runs in browser) 
 async function sha256Hex(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// ── API: fetch citizen alerts ─────────────────────────────────────────────────
+//  API: fetch citizen alerts 
 async function apiFetchAlerts(userId) {
   const res = await fetch(`${API_URL}/v1/citizen/alerts?user_id=${encodeURIComponent(userId)}`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
-// ── API: fetch check history ──────────────────────────────────────────────────
+//  API: fetch check history 
 async function apiFetchHistory(userId) {
   const res = await fetch(`${API_URL}/v1/citizen/history?user_id=${encodeURIComponent(userId)}`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
 
-// ── API: run a new breach check ───────────────────────────────────────────────
+//  API: run a new breach check 
 async function apiRunCheck(type, value) {
   const normalized = type === 'email'
     ? value.trim().toLowerCase()
@@ -40,7 +40,7 @@ async function apiRunCheck(type, value) {
   return { ...data, hash, timestamp: new Date().toISOString() };
 }
 
-// ── API: get AI advisor response (Gemini API) ────────────────────────────────
+//  API: get AI advisor response (Gemini API) 
 // Get your free key at: https://aistudio.google.com/app/apikey
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
@@ -67,12 +67,12 @@ async function apiAskAdvisor(question, context) {
 }
 
 
-// ── MOCK DATA (fallbacks when API is offline) ─────────────────────────────────
+//  MOCK DATA (fallbacks when API is offline) 
 const MONITORED_ITEMS = [
-  { type: 'BVN',    status: 'Active', icon: '🏦', detail: 'Checked against known breach databases and leak sources.' },
-  { type: 'NIN',    status: 'Active', icon: '🪪', detail: 'Monitored for exposure in public breach records and dumps.' },
-  { type: 'Phone',  status: 'Active', icon: '📱', detail: 'Alerted if your number appears in a new dataset.' },
-  { type: 'Email',  status: 'Active', icon: '✉️', detail: 'Tracked for breach reuse, phishing risk, and credential leaks.' },
+  { type: 'BVN',    status: 'Active', icon: '', detail: 'Checked against known breach databases and leak sources.' },
+  { type: 'NIN',    status: 'Active', icon: '', detail: 'Monitored for exposure in public breach records and dumps.' },
+  { type: 'Phone',  status: 'Active', icon: '', detail: 'Alerted if your number appears in a new dataset.' },
+  { type: 'Email',  status: 'Active', icon: '', detail: 'Tracked for breach reuse, phishing risk, and credential leaks.' },
 ];
 
 const ALERTS_DATA = [
@@ -96,7 +96,7 @@ const NEXT_ACTIONS = [
   { title: 'Update contact details',  badge: 'SAFE',   body: 'Make sure alerts reach your current phone number and email address.' },
 ];
 
-// ── CSS ───────────────────────────────────────────────────────────────────────
+//  CSS 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 
@@ -146,7 +146,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
   line-height: 1.5;
 }
 
-/* ── NAV ── */
+/*  NAV  */
 .cd-nav {
   position: sticky; top: 0; z-index: 100;
   width: 100%; height: 64px;
@@ -185,10 +185,10 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 }
 .cd-nav-back:hover { color: var(--red); border-color: var(--red); }
 
-/* ── LAYOUT ── */
+/*  LAYOUT  */
 .cd-layout { display: flex; width: 100%; min-height: calc(100vh - 64px); }
 
-/* ── SIDEBAR ── */
+/*  SIDEBAR  */
 .cd-sidebar {
   width: 210px; flex-shrink: 0;
   background: #fff;
@@ -219,10 +219,10 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-sidebar-item .cd-icon { font-size: 15px; width: 20px; text-align: center; }
 .cd-sidebar-divider { height: 1px; background: var(--border); margin: 10px 0; }
 
-/* ── MAIN ── */
+/*  MAIN  */
 .cd-main { flex: 1; min-width: 0; padding: 1.5rem; }
 
-/* ── HERO CARD ── */
+/*  HERO CARD  */
 .cd-hero {
   background: linear-gradient(135deg, #fff 0%, #F0F7FF 100%);
   border: 1px solid var(--border);
@@ -242,7 +242,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-hero-sub { color: var(--muted); font-size: 13px; max-width: 500px; line-height: 1.6; }
 .cd-hero-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.2rem; }
 
-/* ── BADGES ── */
+/*  BADGES  */
 .cd-badge {
   display: inline-flex; align-items: center; gap: 5px;
   font-size: 11px; font-weight: 700; padding: 4px 10px;
@@ -255,7 +255,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-badge-GRAY   { background: var(--bg3);    color: var(--muted); }
 .cd-badge-WARN   { background: var(--amber2); color: var(--amber); }
 
-/* ── BUTTONS ── */
+/*  BUTTONS  */
 .cd-btn {
   border: none; border-radius: var(--radius-sm);
   padding: 10px 18px; font-weight: 600; cursor: pointer;
@@ -277,7 +277,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
   border: 1px solid rgba(220,38,38,0.2);
 }
 
-/* ── KPI ROW ── */
+/*  KPI ROW  */
 .cd-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.2rem; }
 .cd-kpi {
   background: #fff; border: 1px solid var(--border);
@@ -288,11 +288,11 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-kpi-value { font-family: var(--head); font-size: 1.8rem; font-weight: 700; color: var(--text); }
 .cd-kpi-sub { font-size: 11px; color: var(--muted); margin-top: 5px; }
 
-/* ── GRID ── */
+/*  GRID  */
 .cd-grid-2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 .cd-grid-1 { margin-bottom: 1rem; }
 
-/* ── CARD ── */
+/*  CARD  */
 .cd-card {
   background: #fff; border: 1px solid var(--border);
   border-radius: var(--radius); padding: 1.2rem;
@@ -302,7 +302,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-card-title { font-family: var(--head); font-size: 1rem; font-weight: 700; }
 .cd-card-sub { font-size: 11px; color: var(--muted); }
 
-/* ── MONITORED ITEMS ── */
+/*  MONITORED ITEMS  */
 .cd-monitor-item {
   display: flex; justify-content: space-between; align-items: flex-start;
   padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -318,7 +318,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
   white-space: nowrap;
 }
 
-/* ── TIMELINE / EVENTS ── */
+/*  TIMELINE / EVENTS  */
 .cd-event {
   padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
   background: var(--bg); margin-bottom: 8px;
@@ -328,7 +328,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-event-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
 .cd-event-time { font-size: 11px; color: var(--muted2); font-family: var(--mono); white-space: nowrap; }
 
-/* ── ALERT ITEMS ── */
+/*  ALERT ITEMS  */
 .cd-alert-item {
   padding: 14px; border-radius: var(--radius-sm);
   border: 1px solid var(--border); margin-bottom: 8px;
@@ -341,7 +341,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-alert-title { font-weight: 600; font-size: 13px; }
 .cd-alert-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
 
-/* ── TABLE ── */
+/*  TABLE  */
 .cd-table { width: 100%; border-collapse: collapse; }
 .cd-table th {
   font-size: 11px; color: var(--muted); font-weight: 700;
@@ -355,7 +355,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-table tr:last-child td { border-bottom: none; }
 .cd-table tr:hover td { background: var(--bg); }
 
-/* ── MONITORING TOGGLE ── */
+/*  MONITORING TOGGLE  */
 .cd-toggle-row {
   display: flex; justify-content: space-between; align-items: center;
   padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -378,7 +378,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-toggle.on::after  { left: 21px; }
 .cd-toggle.off::after { left: 3px; }
 
-/* ── PROFILE FORM ── */
+/*  PROFILE FORM  */
 .cd-field { margin-bottom: 12px; }
 .cd-field label { font-size: 11px; color: var(--muted); font-weight: 600; display: block; margin-bottom: 5px; }
 .cd-field input, .cd-field select {
@@ -388,14 +388,14 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 }
 .cd-field input:focus, .cd-field select:focus { border-color: var(--blue); }
 
-/* ── SUBSCRIPTION CARD ── */
+/*  SUBSCRIPTION CARD  */
 .cd-plan-card {
   background: linear-gradient(135deg, var(--blue) 0%, #1D4ED8 100%);
   border-radius: var(--radius); padding: 1.4rem;
   color: #fff; position: relative; overflow: hidden; margin-bottom: 1rem;
 }
 .cd-plan-card::after {
-  content: '🛡'; position: absolute; right: 1.2rem; top: 50%;
+  content: ''; position: absolute; right: 1.2rem; top: 50%;
   transform: translateY(-50%); font-size: 3rem; opacity: 0.15;
 }
 .cd-plan-name { font-family: var(--head); font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
@@ -404,7 +404,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 .cd-plan-features { margin-top: 1rem; display: flex; flex-direction: column; gap: 4px; }
 .cd-plan-feat { font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 6px; }
 
-/* ── RESPONSIVE ── */
+/*  RESPONSIVE  */
 @media (max-width: 1024px) {
   .cd-grid-2 { grid-template-columns: 1fr; }
   .cd-kpis   { grid-template-columns: 1fr 1fr; }
@@ -481,7 +481,7 @@ body, #root { margin: 0; padding: 0; width: 100%; background: var(--bg); }
 }
 `;
 
-// ── LOGIN PAGE COMPONENT ────────────────────────────────────────────────────
+//  LOGIN PAGE COMPONENT 
 function CitizenLogin({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -548,7 +548,7 @@ function CitizenLogin({ onLogin }) {
             border: '1px solid rgba(0,168,107,0.4)',
             borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '28px'
-          }}>🛡</div>
+          }}></div>
           <h1 style={{
             fontSize: '1.75rem', fontWeight: 800,
             color: '#FEF9C3', letterSpacing: '-0.02em'
@@ -618,7 +618,7 @@ function CitizenLogin({ onLogin }) {
   );
 }
 
-// ── AI ADVISOR WIDGET ─────────────────────────────────────────────────────────
+//  AI ADVISOR WIDGET 
 function AIAdvisor({ context }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -660,7 +660,7 @@ function AIAdvisor({ context }) {
         display: 'flex', alignItems: 'center', gap: 8,
         fontFamily: 'var(--body)',
       }}>
-      🤖 AI Advisor
+       AI Advisor
     </button>
   );
 
@@ -672,8 +672,8 @@ function AIAdvisor({ context }) {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       <div style={{ background: 'linear-gradient(135deg, var(--blue), #1D4ED8)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>🤖 NigerSec AI Advisor</div>
-        <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 16 }}>✕</button>
+        <div style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}> NigerSec AI Advisor</div>
+        <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 16 }}></button>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '12px', maxHeight: 280, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {messages.map((m, i) => (
@@ -709,7 +709,7 @@ function AIAdvisor({ context }) {
   );
 }
 
-// ── PANEL: DASHBOARD ──────────────────────────────────────────────────────────
+//  PANEL: DASHBOARD 
 function PanelDashboard({ setPanel, userId }) {
   const [summary, setSummary] = useState(null);
 
@@ -731,7 +731,7 @@ function PanelDashboard({ setPanel, userId }) {
           <div>
             <div style={{ marginBottom: 8 }}>
               <span className={`cd-badge cd-badge-${isBreached ? 'HIGH' : 'SAFE'}`}>
-                {isBreached ? '⚠ Breach detected' : '✓ Safe today'}
+                {isBreached ? ' Breach detected' : ' Safe today'}
               </span>
             </div>
             <div className="cd-hero-title">
@@ -824,7 +824,7 @@ function PanelDashboard({ setPanel, userId }) {
   );
 }
 
-// ── PANEL: ALERTS ─────────────────────────────────────────────────────────────
+//  PANEL: ALERTS 
 function PanelAlerts({ userId }) {
   const [alerts, setAlerts] = useState(null);
   const [dismissed, setDismissed] = useState(new Set());
@@ -847,10 +847,10 @@ function PanelAlerts({ userId }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="cd-card-sub">Plain-language notifications</span>
             {source === 'live' && (
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: 20 }}>● Live</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: 20 }}> Live</span>
             )}
             {source === 'demo' && (
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: 20 }}>○ Demo</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: 20 }}> Demo</span>
             )}
             {source === 'loading' && (
               <span style={{ fontSize: 10, color: 'var(--muted)' }}>Loading…</span>
@@ -905,7 +905,7 @@ function PanelAlerts({ userId }) {
         ))}
         {visible.length === 0 && source !== 'loading' && (
           <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
-            ✓ No active alerts. Your identifiers are clear.
+             No active alerts. Your identifiers are clear.
           </div>
         )}
       </div>
@@ -913,7 +913,7 @@ function PanelAlerts({ userId }) {
   );
 }
 
-// ── PANEL: MONITORING ─────────────────────────────────────────────────────────
+//  PANEL: MONITORING 
 function PanelMonitoring() {
   const [toggles, setToggles] = useState({ sms: true, email: true, push: false });
   const [subActive, setSubActive] = useState(false);
@@ -930,7 +930,7 @@ function PanelMonitoring() {
         </div>
         <div className="cd-plan-features">
           {['Real-time breach alerts', 'Dark web monitoring 24/7', 'BVN, NIN, Phone & Email coverage', 'SMS + Email + Push notifications', 'NDPA compliant — no raw data stored'].map(f => (
-            <div key={f} className="cd-plan-feat"><span>✓</span>{f}</div>
+            <div key={f} className="cd-plan-feat"><span></span>{f}</div>
           ))}
         </div>
       </div>
@@ -959,7 +959,7 @@ function PanelMonitoring() {
           </div>
           {subActive && (
             <div style={{ marginTop: 12, padding: '8px 12px', background: 'var(--green2)', borderRadius: 8, fontSize: 12, color: 'var(--green)' }}>
-              ✓ Monitoring is active. Next scan in ~4 hours.
+               Monitoring is active. Next scan in ~4 hours.
             </div>
           )}
         </div>
@@ -992,7 +992,7 @@ function PanelMonitoring() {
   );
 }
 
-// ── PANEL: HISTORY ────────────────────────────────────────────────────────────
+//  PANEL: HISTORY 
 function PanelHistory({ userId, onNewCheck }) {
   const [history, setHistory] = useState(null);
   const [source, setSource] = useState('loading');
@@ -1071,8 +1071,8 @@ function PanelHistory({ userId, onNewCheck }) {
             color: checkResult.breached ? 'var(--red)' : 'var(--green)',
             border: `1px solid ${checkResult.breached ? 'rgba(220,38,38,0.2)' : 'rgba(5,150,105,0.2)'}` }}>
             {checkResult.breached
-              ? `⚠ Found in ${checkResult.breach_count} breach${checkResult.breach_count !== 1 ? 'es' : ''}. Take action immediately.`
-              : '✓ No breaches found. Stay vigilant.'}
+              ? ` Found in ${checkResult.breach_count} breach${checkResult.breach_count !== 1 ? 'es' : ''}. Take action immediately.`
+              : ' No breaches found. Stay vigilant.'}
             {checkResult.hash && (
               <div style={{ fontFamily: 'var(--mono)', fontSize: 10, marginTop: 4, opacity: 0.7 }}>
                 ZK hash: {checkResult.hash.slice(0, 16)}…
@@ -1088,8 +1088,8 @@ function PanelHistory({ userId, onNewCheck }) {
           <div className="cd-card-title">Check History</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="cd-card-sub">Recent scans and outcomes</span>
-            {source === 'live' && <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: 20 }}>● Live</span>}
-            {source === 'demo' && <span style={{ fontSize: 10, fontWeight: 700, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: 20 }}>○ Demo</span>}
+            {source === 'live' && <span style={{ fontSize: 10, fontWeight: 700, color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: 20 }}> Live</span>}
+            {source === 'demo' && <span style={{ fontSize: 10, fontWeight: 700, color: '#D97706', background: '#FEF3C7', padding: '2px 8px', borderRadius: 20 }}> Demo</span>}
           </div>
         </div>
         {source === 'loading' ? (
@@ -1116,7 +1116,7 @@ function PanelHistory({ userId, onNewCheck }) {
                   <td style={{ color: 'var(--muted)', fontSize: 13 }}>{row.outcome}</td>
                   <td>
                     <span className={`cd-badge cd-badge-${row.status}`}>
-                      {row.status === 'SAFE' ? '✓ Clear' : row.status === 'HIGH' ? '⚠ High' : '⚠ Medium'}
+                      {row.status === 'SAFE' ? ' Clear' : row.status === 'HIGH' ? ' High' : ' Medium'}
                     </span>
                   </td>
                 </tr>
@@ -1130,7 +1130,7 @@ function PanelHistory({ userId, onNewCheck }) {
   );
 }
 
-// ── PANEL: PROFILE ────────────────────────────────────────────────────────────
+//  PANEL: PROFILE 
 function PanelProfile() {
   const [saved, setSaved] = useState(false);
   return (
@@ -1163,7 +1163,7 @@ function PanelProfile() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="cd-btn cd-btn-primary" onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2000); }}>
-              {saved ? '✓ Saved!' : 'Save changes'}
+              {saved ? ' Saved!' : 'Save changes'}
             </button>
             <button className="cd-btn cd-btn-secondary">Cancel</button>
           </div>
@@ -1203,7 +1203,7 @@ function PanelProfile() {
   );
 }
 
-// ── SIDEBAR NAV ITEMS ─────────────────────────────────────────────────────────
+//  SIDEBAR NAV ITEMS 
 // badge is now dynamic — passed as prop from main component
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard'  },
@@ -1213,7 +1213,7 @@ const NAV_ITEMS = [
   { id: 'profile',   label: 'Profile'    },
 ];
 
-// ── PANEL TITLES ──────────────────────────────────────────────────────────────
+//  PANEL TITLES 
 const PANEL_TITLES = {
   dashboard:  'Your Breach Dashboard',
   alerts:     'Alert Feed',
@@ -1222,7 +1222,7 @@ const PANEL_TITLES = {
   profile:    'Account & Profile',
 };
 
-// ── MAIN COMPONENT ────────────────────────────────────────────────────────────
+//  MAIN COMPONENT 
 export default function CitizenDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -1278,7 +1278,7 @@ export default function CitizenDashboard() {
             </div>
           </div>
           <div className="cd-nav-right">
-            <div className="cd-nav-user">👤 {user?.name || 'Citizen'} A.</div>
+            <div className="cd-nav-user"> {user?.name || 'Citizen'} A.</div>
             <button className="cd-nav-back" onClick={handleLogout}>
               Logout
             </button>
@@ -1335,11 +1335,11 @@ export default function CitizenDashboard() {
         {/* Mobile bottom navigation bar */}
         <nav className="cd-bottom-nav">
           {[
-            { id: 'dashboard',  icon: '🏠', label: 'Home' },
-            { id: 'alerts',     icon: '🔔', label: 'Alerts' },
-            { id: 'monitoring', icon: '📡', label: 'Monitor' },
-            { id: 'history',    icon: '🕓', label: 'History' },
-            { id: 'profile',    icon: '👤', label: 'Profile' },
+            { id: 'dashboard',  icon: '', label: 'Home' },
+            { id: 'alerts',     icon: '', label: 'Alerts' },
+            { id: 'monitoring', icon: '', label: 'Monitor' },
+            { id: 'history',    icon: '', label: 'History' },
+            { id: 'profile',    icon: '', label: 'Profile' },
           ].map(item => (
             <div
               key={item.id}
