@@ -1,5 +1,6 @@
 package com.nigersec.intelligence_backend.citizen.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,8 +31,10 @@ public class MonitoringSubscription {
     @Column(nullable = false)
     private boolean active = true;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant expiresAt;  // null = never expires
 
     @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant createdAt;
 }

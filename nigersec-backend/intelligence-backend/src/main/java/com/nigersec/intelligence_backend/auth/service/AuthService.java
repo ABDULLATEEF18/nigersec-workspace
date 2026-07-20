@@ -100,6 +100,7 @@ public class AuthService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .institutionId(user.getInstitutionId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .expiresIn(accessExpirationMs / 1000)

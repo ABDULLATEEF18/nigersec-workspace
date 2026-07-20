@@ -29,10 +29,14 @@ async function checkBreach(type, rawValue) {
 
 //  REAL API CALL: notify me signup (monitoring subscription)
 async function subscribeNotify(email) {
-  // Requires auth token — stub kept for compatibility
+  const token = sessionStorage.getItem('ns_token');
+  if (!token) throw new Error('LOGIN_REQUIRED');
   const res = await fetch(`${API_BASE}/citizen/monitoring/subscribe`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
     body: JSON.stringify({ identifier: email, dataType: 'EMAIL' }),
   });
   if (!res.ok) throw new Error(`API ${res.status}`);
@@ -705,9 +709,13 @@ export default function Home() {
     try {
       await subscribeNotify(notifyEmail);
       setNotifyMsg(' You\'re on the list! We\'ll alert you when your data appears.');
-    } catch {
-      // API not yet deployed — still acknowledge in demo
-      setNotifyMsg(' Verification link sent! (demo mode — deploy backend to go live)');
+    } catch (e) {
+      if (e.message === 'LOGIN_REQUIRED') {
+        setNotifyMsg(' Please log in to your Citizen account first to enable monitoring.');
+      } else {
+        // Backend offline — acknowledge in demo mode
+        setNotifyMsg(' Verification link sent! (demo mode — deploy backend to go live)');
+      }
     }
     setTimeout(() => setNotifyMsg(''), 4000);
     setNotifyEmail('');

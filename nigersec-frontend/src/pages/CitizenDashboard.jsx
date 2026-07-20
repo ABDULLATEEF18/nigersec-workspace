@@ -5,15 +5,49 @@ import { useNavigate } from 'react-router-dom';
 // Vite proxies /api → http://localhost:8080 in dev.
 const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
 
-// NOTE: SHA helpers were present but unused; keep implementations in utilities if needed.
+// Helper: read JWT from sessionStorage
+function citizenAuthHeader() {
+  const token = sessionStorage.getItem('ns_token');
+  return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+
+// Helper: fetch with automatic JWT refresh on 401.
+// Clears session and redirects to login if refresh fails.
+async function authFetch(url, options = {}) {
+  const res = await fetch(url, { ...options, headers: { ...citizenAuthHeader(), ...(options.headers || {}) } });
+  if (res.status !== 401) return res;
+
+  const refreshToken = sessionStorage.getItem('ns_refresh_token');
+  if (!refreshToken) { clearCitizenSession(); return res; }
+
+  const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!refreshRes.ok) { clearCitizenSession(); return res; }
+
+  const body = await refreshRes.json();
+  sessionStorage.setItem('ns_token', body.data.accessToken);
+  if (body.data.refreshToken) sessionStorage.setItem('ns_refresh_token', body.data.refreshToken);
+
+  return fetch(url, { ...options, headers: { ...citizenAuthHeader(), ...(options.headers || {}) } });
+}
+
+function clearCitizenSession() {
+  sessionStorage.removeItem('ns_token');
+  sessionStorage.removeItem('ns_refresh_token');
+  sessionStorage.removeItem('ns_user_id');
+  localStorage.removeItem('nigersec_citizen');
+  window.location.reload();
+}
 
 //  API: fetch citizen monitoring subscriptions / alerts
 async function apiFetchAlerts(userId) {
-  const token = sessionStorage.getItem('ns_token');
   const uid = userId || sessionStorage.getItem('ns_user_id');
-  const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-  if (uid) headers['X-User-Id'] = uid;
-  const res = await fetch(`${API_BASE}/citizen/monitoring`, { headers });
+  const extraHeaders = uid ? { 'X-User-Id': uid } : {};
+  const res = await authFetch(`${API_BASE}/citizen/monitoring`, { headers: extraHeaders });
   if (!res.ok) throw new Error(`API ${res.status}`);
   const body = await res.json();
   // Backend returns { success, data: [...MonitoringSubscription] }
@@ -32,11 +66,9 @@ async function apiFetchAlerts(userId) {
 //  API: fetch check history — re-uses monitoring list as a proxy until
 //  a dedicated /citizen/history endpoint is added
 async function apiFetchHistory(userId) {
-  const token = sessionStorage.getItem('ns_token');
   const uid = userId || sessionStorage.getItem('ns_user_id');
-  const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-  if (uid) headers['X-User-Id'] = uid;
-  const res = await fetch(`${API_BASE}/citizen/monitoring`, { headers });
+  const extraHeaders = uid ? { 'X-User-Id': uid } : {};
+  const res = await authFetch(`${API_BASE}/citizen/monitoring`, { headers: extraHeaders });
   if (!res.ok) throw new Error(`API ${res.status}`);
   const body = await res.json();
   const subs = body.data || [];

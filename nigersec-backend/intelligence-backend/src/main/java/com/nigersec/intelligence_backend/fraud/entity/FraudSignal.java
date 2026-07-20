@@ -1,5 +1,6 @@
 package com.nigersec.intelligence_backend.fraud.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,5 +43,6 @@ public class FraudSignal {
     private UUID reportedByInstitution;
 
     @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant createdAt;
 }

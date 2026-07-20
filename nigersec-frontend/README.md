@@ -1,20 +1,42 @@
-<<<<<<< HEAD
-# React + Vite
+# NigerSec Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 SPA — the browser interface for the NigerSec platform.
 
-Currently, two official plugins are available:
+See the [root README](../README.md) for full setup and API documentation.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Pages
 
-## React Compiler
+| Route | Description |
+|---|---|
+| `/` | Public landing page — breach checker, fraud score demo, recent breach table |
+| `/citizen` | Citizen dashboard — monitoring, alerts, check history (login required) |
+| `/institution` | Institution portal — threat feed, compliance reports, fraud API (login required) |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Local development
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev      # http://localhost:5173
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-"# MAJOR_V_CYBERSECURITY_TEAM" 
->>>>>>> 47e55eca9fb1647a80c6b5de2b7a690d45489e32
+Vite proxies all `/api/*` calls to `http://localhost:8080` automatically.
+
+## Environment variables
+
+Create a `.env` file in this directory:
+
+```env
+# Leave blank to use the Vite dev proxy (recommended for local dev)
+VITE_API_URL=
+
+# Optional — enables the AI breach advisor and threat explainer
+# Free key at https://aistudio.google.com/app/apikey
+VITE_GEMINI_API_KEY=
+```
+
+## Build for production
+
+```bash
+npm run build    # output → dist/
+npm run preview  # preview the production build locally
+```

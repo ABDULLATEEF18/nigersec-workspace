@@ -48,8 +48,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
-        log.error("Unhandled exception", ex);
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        // Expose real error message in dev profile to aid debugging
+        String msg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred"));
+                .body(ApiResponse.error(msg));
     }
 }

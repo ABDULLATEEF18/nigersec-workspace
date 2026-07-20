@@ -1,5 +1,6 @@
 package com.nigersec.intelligence_backend.fraud.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nigersec.intelligence_backend.fraud.entity.FraudDecision;
 import com.nigersec.intelligence_backend.fraud.entity.RiskLevel;
 import lombok.Builder;
@@ -20,5 +21,6 @@ public class TransactionScoreResponse {
     private List<String> flags;
     private String recommendation;
     private long processingTimeMs;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant scoredAt;
 }

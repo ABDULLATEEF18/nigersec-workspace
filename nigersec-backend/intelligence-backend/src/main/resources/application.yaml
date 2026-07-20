@@ -11,6 +11,12 @@ spring:
       connection-timeout: 10000
       initialization-fail-timeout: 30000
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false   # serialize Instant/LocalDate as ISO-8601 strings
+    deserialization:
+      fail-on-unknown-properties: false
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -67,7 +73,7 @@ nigersec:
     citizen-queries-per-hour: 10
     api-calls-per-minute: 100
   dark-web:
-    api-key: 5dd5a9a8e2msha6dfaa2274b97fap146115jsn063d72c2de53
+    api-key: ccd9727faamsh9c20e75cfc7643bp17f29bjsn173d28c296d3
     base-url: ${DARK_WEB_API_URL:https://breachdirectory.p.rapidapi.com}
   fraud:
     risk-threshold-medium: 40

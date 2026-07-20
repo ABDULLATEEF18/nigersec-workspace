@@ -11,6 +11,7 @@ public class AuthResponse {
     private UUID userId;
     private String email;
     private UserRole role;
+    private String institutionId;
     private String accessToken;
     private String refreshToken;
     private long expiresIn;

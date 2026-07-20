@@ -1,5 +1,6 @@
 package com.nigersec.intelligence_backend.institution.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nigersec.intelligence_backend.citizen.entity.SeverityLevel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,7 +50,9 @@ public class ThreatReport {
     private boolean broadcastedToNetwork = false;
 
     @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant createdAt;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     private Instant attackDetectedAt;
 }

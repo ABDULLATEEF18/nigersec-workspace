@@ -11,6 +11,41 @@ function authHeader() {
   return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 }
 
+// Helper: fetch with automatic JWT refresh on 401.
+// If the refresh also fails the session is cleared and the page reloads to the login screen.
+async function authFetch(url, options = {}) {
+  const res = await fetch(url, { ...options, headers: { ...authHeader(), ...(options.headers || {}) } });
+  if (res.status !== 401) return res;
+
+  // Try to refresh the access token
+  const refreshToken = sessionStorage.getItem('ns_refresh_token');
+  if (!refreshToken) { clearSession(); return res; }
+
+  const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!refreshRes.ok) { clearSession(); return res; }
+
+  const body = await refreshRes.json();
+  sessionStorage.setItem('ns_token', body.data.accessToken);
+  if (body.data.refreshToken) sessionStorage.setItem('ns_refresh_token', body.data.refreshToken);
+
+  // Retry original request with the new token
+  return fetch(url, { ...options, headers: { ...authHeader(), ...(options.headers || {}) } });
+}
+
+function clearSession() {
+  sessionStorage.removeItem('ns_token');
+  sessionStorage.removeItem('ns_refresh_token');
+  sessionStorage.removeItem('ns_institution_id');
+  sessionStorage.removeItem('ns_user_id');
+  localStorage.removeItem('nigersec_institution');
+  window.location.reload();
+}
+
 //  API: login — stores JWT and institution id in sessionStorage
 async function apiLogin(email, password) {
   const res = await fetch(`${API_BASE}/auth/login`, {
@@ -51,9 +86,8 @@ async function apiRegister(email, password, institutionId) {
 //  API: fetch live threat alerts (threat feed)
 async function apiFetchAlerts(orgId) {
   const instId = orgId || sessionStorage.getItem('ns_institution_id');
-  const headers = { ...authHeader() };
-  if (instId) headers['X-Institution-Id'] = instId;
-  const res = await fetch(`${API_BASE}/institution/threat-feed?page=0&size=20`, { headers });
+  const extraHeaders = instId ? { 'X-Institution-Id': instId } : {};
+  const res = await authFetch(`${API_BASE}/institution/threat-feed?page=0&size=20`, { headers: extraHeaders });
   if (!res.ok) throw new Error(`API ${res.status}`);
   const body = await res.json();
   // Backend returns { success, data: Page<ThreatFeedResponse> }
@@ -77,10 +111,7 @@ async function apiFetchAlerts(orgId) {
 
 //  API: fetch phishing campaigns — maps PHISHING attack type from threat feed
 async function apiFetchPhishing() {
-  const res = await fetch(
-    `${API_BASE}/institution/threat-feed?attackType=PHISHING&page=0&size=20`,
-    { headers: authHeader() }
-  );
+  const res = await authFetch(`${API_BASE}/institution/threat-feed?attackType=PHISHING&page=0&size=20`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   const body = await res.json();
   const items = body.data?.content || [];
@@ -97,17 +128,23 @@ async function apiFetchPhishing() {
 }
 
 //  API: submit threat report (peer intelligence)
-async function apiSubmitThreatReport(attackType, description, region, institutionId) {
+// indicators should be IOCs (IPs, domains, hashes) — separate from region/description
+async function apiSubmitThreatReport(attackType, description, indicators, severity, institutionId) {
   const instId = institutionId || sessionStorage.getItem('ns_institution_id');
   if (!instId) throw new Error('No institution ID — log in as an institution user first');
-  const res = await fetch(`${API_BASE}/institution/threat-reports`, {
+  // Normalise attackType to match the backend AttackType enum exactly
+  // Valid values: PHISHING, SOCIAL_ENGINEERING, DATA_BREACH, RANSOMWARE,
+  //               ACCOUNT_TAKEOVER, SIM_SWAP, INSIDER_THREAT, API_ABUSE,
+  //               DDOS, CREDENTIAL_STUFFING, OTHER
+  const normalizedType = attackType.toUpperCase().replace(/ /g, '_');
+  const res = await authFetch(`${API_BASE}/institution/threat-reports`, {
     method: 'POST',
-    headers: { ...authHeader(), 'X-Institution-Id': instId },
+    headers: { 'X-Institution-Id': instId },
     body: JSON.stringify({
-      attackType: attackType.toUpperCase().replace(/ /g, '_'),
+      attackType: normalizedType,
       description,
-      severity: 'HIGH',
-      indicators: region,
+      severity: severity || 'HIGH',
+      indicators: indicators || '',
     }),
   });
   if (!res.ok) throw new Error(`API ${res.status}`);
@@ -118,9 +155,8 @@ async function apiSubmitThreatReport(attackType, description, region, institutio
 async function apiFetchComplianceReport(institutionId, year, month) {
   const instId = institutionId || sessionStorage.getItem('ns_institution_id');
   if (!instId) throw new Error('No institution ID');
-  const res = await fetch(
-    `${API_BASE}/institution/compliance-report/${encodeURIComponent(instId)}?year=${year}&month=${month}`,
-    { headers: authHeader() }
+  const res = await authFetch(
+    `${API_BASE}/institution/compliance-report/${encodeURIComponent(instId)}?year=${year}&month=${month}`
   );
   if (!res.ok) throw new Error(`API ${res.status}`);
   return (await res.json()).data;
@@ -130,7 +166,7 @@ async function apiFetchComplianceReport(institutionId, year, month) {
 async function apiFetchKPIs(orgId) {
   const instId = orgId || sessionStorage.getItem('ns_institution_id');
   if (!instId) return null;
-  const res = await fetch(`${API_BASE}/fraud/history/${encodeURIComponent(instId)}?page=0&size=1`, { headers: authHeader() });
+  const res = await authFetch(`${API_BASE}/fraud/history/${encodeURIComponent(instId)}?page=0&size=1`);
   if (!res.ok) throw new Error(`API ${res.status}`);
   return res.json();
 }
@@ -1018,6 +1054,16 @@ function PanelPhishing() {
   );
 }
 
+// Maps UI display names to exact AttackType enum values
+const INCIDENT_TYPE_MAP = {
+  'API Credential Theft':    'API_ABUSE',
+  'Phishing Campaign':       'PHISHING',
+  'BVN/NIN Batch Exposure':  'DATA_BREACH',
+  'SIM Swap Cluster':        'SIM_SWAP',
+  'Card Testing Burst':      'CREDENTIAL_STUFFING',
+  'Other':                   'OTHER',
+};
+
 function PanelPeer({ orgId }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -1030,7 +1076,12 @@ function PanelPeer({ orgId }) {
   const handlePeerSubmit = async () => {
     setSubmitError('');
     try {
-      await apiSubmitThreatReport(incidentType, description || `${incidentType} incident reported anonymously`, region);
+      const attackType = INCIDENT_TYPE_MAP[incidentType] || 'OTHER';
+      const fullDescription = description
+        ? (region ? `[${region}] ${description}` : description)
+        : `${incidentType} incident reported anonymously${region ? ` — region: ${region}` : ''}`;
+      // indicators are IOCs (left empty here; the form does not collect them yet)
+      await apiSubmitThreatReport(attackType, fullDescription, '', 'HIGH');
       setSubmitted(true);
     } catch (err) {
       // Fall back to optimistic UI if backend is unavailable
@@ -1046,7 +1097,7 @@ function PanelPeer({ orgId }) {
       protected: Math.floor(Math.random() * 50) + 5,
     }))); setSource('live'); })
       .catch(() => { setReports(PEER_REPORTS); setSource('demo'); });
-  }, []);
+  }, [orgId]);
 
   const items = reports || [];
   return (
@@ -1187,7 +1238,8 @@ const NAV_ITEMS = [
 
 function InstitutionDashboard({ user, onLogout }) {
   const [activePanel, setActivePanel] = useState('dashboard');
-  const orgId = user?.email?.split('@')[0] || 'demo';
+  // Use the real institution UUID stored at login; fall back to 'demo' only for display labels
+  const orgId = user?.institutionId || sessionStorage.getItem('ns_institution_id') || null;
 
   const renderPanel = () => {
     switch (activePanel) {
@@ -1248,8 +1300,23 @@ export default function App() {
   });
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('nigersec_institution'));
 
-  const handleLogin = (userData) => { setUser(userData); setIsAuthenticated(true); };
-  const handleLogout = () => { localStorage.removeItem('nigersec_institution'); setUser(null); setIsAuthenticated(false); };
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    // Persist institutionId to sessionStorage so all API helpers can read it
+    if (userData.institutionId) {
+      sessionStorage.setItem('ns_institution_id', userData.institutionId);
+    }
+  };
+  const handleLogout = () => {
+    localStorage.removeItem('nigersec_institution');
+    sessionStorage.removeItem('ns_token');
+    sessionStorage.removeItem('ns_refresh_token');
+    sessionStorage.removeItem('ns_institution_id');
+    sessionStorage.removeItem('ns_user_id');
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
   if (!isAuthenticated) return <InstitutionalLogin onLogin={handleLogin} />;
   return <InstitutionDashboard user={user} onLogout={handleLogout} />;
