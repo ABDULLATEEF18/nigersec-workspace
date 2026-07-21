@@ -4,8 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -17,10 +17,10 @@ import java.time.Duration;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    @Autowired(required = false)
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${nigersec.rate-limit.citizen-queries-per-hour:10}")
     private int citizenQueriesPerHour;
@@ -34,6 +34,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // Apply rate limit only to public breach check endpoint
         if ("/api/v1/citizen/breach/check".equals(request.getRequestURI())
                 && "POST".equalsIgnoreCase(request.getMethod())) {
+
+            if (redisTemplate == null) {
+                log.debug("Rate limit check skipped: Redis template not available");
+                chain.doFilter(request, response);
+                return;
+            }
 
             try {
                 String clientIp = getClientIp(request);

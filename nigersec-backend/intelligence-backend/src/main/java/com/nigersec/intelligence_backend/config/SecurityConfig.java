@@ -43,10 +43,11 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+                // Public endpoints (paths are servlet-relative; context-path is configured separately)
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/citizen/breach/check").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/fraud/mock/**", "/fraud/pricing", "/fraud/health", "/ws/fraud/**").permitAll()
                 // Portal 2 - institutions only
                 .requestMatchers("/institution/**").hasAnyRole("INSTITUTION", "ADMIN")
                 // Portal 3 - developers + institutions

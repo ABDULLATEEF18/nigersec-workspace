@@ -2,6 +2,7 @@ package com.nigersec.intelligence_backend.fraud.controller;
 
 import com.nigersec.intelligence_backend.common.response.ApiResponse;
 import com.nigersec.intelligence_backend.fraud.dto.ApiKeyResponse;
+import com.nigersec.intelligence_backend.fraud.dto.PricingPlanResponse;
 import com.nigersec.intelligence_backend.fraud.dto.TransactionScoreRequest;
 import com.nigersec.intelligence_backend.fraud.dto.TransactionScoreResponse;
 import com.nigersec.intelligence_backend.fraud.entity.ApiKey;
@@ -35,10 +36,39 @@ public class FraudApiController {
     @PostMapping("/score")
     @PreAuthorize("hasAnyRole('DEVELOPER', 'INSTITUTION', 'ADMIN')")
     public ResponseEntity<ApiResponse<TransactionScoreResponse>> scoreTransaction(
-            @RequestHeader("X-Institution-Id") UUID institutionId,
+            @RequestHeader(value = "X-Institution-Id", required = false) UUID institutionId,
             @Valid @RequestBody TransactionScoreRequest request) {
         TransactionScoreResponse response = fraudDetectionService.scoreTransaction(institutionId, request);
         return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    /**
+     * POST /api/v1/fraud/mock/score
+     * Public mock endpoint for demos and Postman testing.
+     */
+    @PostMapping("/mock/score")
+    public ResponseEntity<ApiResponse<TransactionScoreResponse>> mockScoreTransaction(
+            @Valid @RequestBody TransactionScoreRequest request) {
+        TransactionScoreResponse response = fraudDetectionService.scoreTransaction(null, request);
+        return ResponseEntity.ok(ApiResponse.ok(response, "Mock fraud scoring response"));
+    }
+
+    /**
+     * GET /api/v1/fraud/pricing
+     * Return mock pricing plans for institutions.
+     */
+    @GetMapping("/pricing")
+    public ResponseEntity<ApiResponse<List<PricingPlanResponse>>> getPricingPlans() {
+        return ResponseEntity.ok(ApiResponse.ok(fraudDetectionService.getPricingPlans()));
+    }
+
+    /**
+     * GET /api/v1/fraud/health
+     * Lightweight health check for the fraud module.
+     */
+    @GetMapping("/health")
+    public ResponseEntity<ApiResponse<String>> getFraudHealth() {
+        return ResponseEntity.ok(ApiResponse.ok("fraud-engine-ready"));
     }
 
     /**

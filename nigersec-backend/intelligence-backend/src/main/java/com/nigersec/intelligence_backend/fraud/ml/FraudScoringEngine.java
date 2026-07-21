@@ -4,7 +4,6 @@ import com.nigersec.intelligence_backend.citizen.repository.BreachRecordReposito
 import com.nigersec.intelligence_backend.citizen.service.BreachCheckService;
 import com.nigersec.intelligence_backend.fraud.dto.TransactionScoreRequest;
 import com.nigersec.intelligence_backend.fraud.entity.FraudDecision;
-import com.nigersec.intelligence_backend.fraud.entity.FraudSignal;
 import com.nigersec.intelligence_backend.fraud.entity.RiskLevel;
 import com.nigersec.intelligence_backend.fraud.repository.FraudSignalRepository;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +91,21 @@ public class FraudScoringEngine {
                 && request.getAmount().compareTo(new BigDecimal("100000")) > 0) {
             totalScore += 10;
             flags.add("Large USSD transaction - common SIM-swap fraud pattern");
+        }
+
+        // Mock simulation hooks for local demo traffic and Postman exercises
+        if (request.getDeviceFingerprint() != null && request.getDeviceFingerprint().contains("mock")) {
+            totalScore += 8;
+            flags.add("Mock device fingerprint matched a high-risk demo profile");
+        }
+        if (request.getIpAddress() != null && request.getIpAddress().startsWith("197.")) {
+            totalScore += 6;
+            flags.add("Traffic originated from a suspicious IP range");
+        }
+        if ("POS".equals(request.getChannel()) && request.getAmount() != null
+                && request.getAmount().compareTo(new BigDecimal("750000")) > 0) {
+            totalScore += 7;
+            flags.add("Large POS transaction flagged by the mock payment simulation");
         }
 
         double capped = Math.min(totalScore, 100.0);

@@ -3,6 +3,7 @@ package com.nigersec.intelligence_backend.fraud.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nigersec.intelligence_backend.common.exception.NigerSecException;
 import com.nigersec.intelligence_backend.fraud.dto.ApiKeyResponse;
+import com.nigersec.intelligence_backend.fraud.dto.PricingPlanResponse;
 import com.nigersec.intelligence_backend.fraud.dto.TransactionScoreRequest;
 import com.nigersec.intelligence_backend.fraud.dto.TransactionScoreResponse;
 import com.nigersec.intelligence_backend.fraud.entity.ApiKey;
@@ -38,6 +39,7 @@ public class FraudDetectionService {
     private final ApiKeyRepository apiKeyRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
     private final ObjectMapper objectMapper;
+    private final FraudRealtimeNotificationService fraudRealtimeNotificationService;
 
     /**
      * Core fraud scoring endpoint.
@@ -47,6 +49,7 @@ public class FraudDetectionService {
     @Transactional
     public TransactionScoreResponse scoreTransaction(UUID institutionId,
                                                      TransactionScoreRequest request) {
+        UUID resolvedInstitutionId = institutionId != null ? institutionId : UUID.fromString("11111111-1111-1111-1111-111111111111");
         FraudScoringEngine.ScoringResult result = scoringEngine.score(request);
 
         // Persist signal for ML training and velocity checks
@@ -56,7 +59,7 @@ public class FraudDetectionService {
                 .riskLevel(result.getRiskLevel())
                 .decision(result.getDecision())
                 .flagReasons(toJson(result.getFlags()))
-                .reportedByInstitution(institutionId)
+                .reportedByInstitution(resolvedInstitutionId)
                 .build();
         signal = fraudSignalRepository.save(signal);
 
@@ -64,7 +67,7 @@ public class FraudDetectionService {
         if (result.getRiskLevel() == com.nigersec.intelligence_backend.fraud.entity.RiskLevel.HIGH) {
             kafkaEventPublisher.publishFraudFlagged(Map.of(
                     "transactionId",   request.getTransactionId(),
-                    "institutionId",   institutionId.toString(),
+                    "institutionId",   resolvedInstitutionId.toString(),
                     "riskScore",       result.getScore().toString(),
                     "decision",        result.getDecision().name()
             ));
@@ -75,6 +78,15 @@ public class FraudDetectionService {
             case REVIEW  -> "Flag for manual review before processing.";
             case APPROVE -> "Transaction appears legitimate. Proceed normally.";
         };
+
+        fraudRealtimeNotificationService.notifyFraudEvent(resolvedInstitutionId, TransactionScoreResponse.builder()
+                .transactionId(request.getTransactionId())
+                .riskScore(result.getScore())
+                .riskLevel(result.getRiskLevel())
+                .decision(result.getDecision())
+                .flags(result.getFlags())
+                .recommendation(recommendation)
+                .build());
 
         return TransactionScoreResponse.builder()
                 .scoreId(signal.getId())
@@ -95,6 +107,41 @@ public class FraudDetectionService {
     public Page<FraudSignal> getFraudHistory(UUID institutionId, Pageable pageable) {
         return fraudSignalRepository.findByReportedByInstitutionOrderByCreatedAtDesc(
                 institutionId, pageable);
+    }
+
+    public List<PricingPlanResponse> getPricingPlans() {
+        return List.of(
+                PricingPlanResponse.builder()
+                        .planId("starter")
+                        .name("Starter")
+                        .summary("Ideal for regional fintechs")
+                        .monthlyFee(new java.math.BigDecimal("250000"))
+                        .perThousandTransactions(new java.math.BigDecimal("150"))
+                        .recommendedFor("SMEs and digital lenders")
+                        .features(List.of("2,000 monthly checks", "Realtime rule alerts", "Postman-friendly demo API"))
+                        .setupFee("Free")
+                        .build(),
+                PricingPlanResponse.builder()
+                        .planId("growth")
+                        .name("Growth")
+                        .summary("For scaling payment providers")
+                        .monthlyFee(new java.math.BigDecimal("750000"))
+                        .perThousandTransactions(new java.math.BigDecimal("110"))
+                        .recommendedFor("Payment aggregators and banks")
+                        .features(List.of("50,000 monthly checks", "Webhook and WS alerts", "Institution dashboard"))
+                        .setupFee("₦250,000")
+                        .build(),
+                PricingPlanResponse.builder()
+                        .planId("enterprise")
+                        .name("Enterprise")
+                        .summary("Dedicated fraud operations for national platforms")
+                        .monthlyFee(new java.math.BigDecimal("2500000"))
+                        .perThousandTransactions(new java.math.BigDecimal("80"))
+                        .recommendedFor("Tier-1 processors and telcos")
+                        .features(List.of("Unlimited volume", "Dedicated analyst workspace", "Priority incident support"))
+                        .setupFee("Custom")
+                        .build()
+        );
     }
 
     /**
