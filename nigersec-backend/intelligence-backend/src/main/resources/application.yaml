@@ -3,10 +3,10 @@ spring:
     name: intelligence-backend
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nigersec}
-    username: ${DB_USER:nigersec}
-    password: ${DB_PASS:nigersec}
-    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL:jdbc:h2:mem:nigersec;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DB_USER:sa}
+    password: ${DB_PASS:}
+    driver-class-name: ${DB_DRIVER_CLASS_NAME:org.h2.Driver}
     hikari:
       connection-timeout: 10000
       initialization-fail-timeout: 30000
@@ -23,7 +23,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
         format_sql: true
 
   data:
@@ -87,6 +87,11 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false
 
 logging:
   level:
